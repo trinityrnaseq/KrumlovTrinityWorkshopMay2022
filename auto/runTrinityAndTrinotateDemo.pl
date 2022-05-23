@@ -414,8 +414,8 @@ sub run_Trinotate_demo {
     @sections = grep { $_ ne 'GLOBALS' } @sections;
 
     my %globals = $ini_reader->get_section_hash('GLOBALS');
-    $globals{TRANSCRIPTS_FASTA} = "Trinity.fasta";
-    $globals{GENE_TO_TRANS_MAP} = "Trinity.fasta.gene_trans_map";
+    $globals{TRANSCRIPTS_FASTA} = "../Trinity.fasta";
+    $globals{GENE_TO_TRANS_MAP} = "../Trinity.fasta.gene_trans_map";
     $globals{CPU} = 2;
     $globals{TRINOTATE_HOME} = $trinotate_dir;
     
