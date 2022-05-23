@@ -14,6 +14,7 @@ chdir $FindBin::Bin or die "error, cannot cd to $FindBin::Bin";
 my @files_to_keep = qw (
 README.md
 cleanme.pl
+__setup.sh
 );                      
 
 
