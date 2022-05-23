@@ -1,2 +1,1 @@
-# KrumlovTrinityWorkshopMay2022
-Krumlov Trinity Workshop, May 2022
+Click the 'wiki' link for all workshop instructions
