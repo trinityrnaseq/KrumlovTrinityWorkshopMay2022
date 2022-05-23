@@ -5,9 +5,6 @@ use warnings;
 
 use FindBin;
 
-my $FULL_CLEAN = $ARGV[0] || 0;
-
-
 ## we delete all files we don't need in this directory. Be careful in case users try running it somewhere else, outside this dir.
 chdir $FindBin::Bin or die "error, cannot cd to $FindBin::Bin";
 
@@ -16,9 +13,7 @@ chdir $FindBin::Bin or die "error, cannot cd to $FindBin::Bin";
 
 my @files_to_keep = qw (
 README.md
-runTrinityDemo.pl
 cleanme.pl
-Trinotate.sqlite
 );                      
 
 
@@ -41,6 +36,8 @@ foreach my $file (<*>) {
 `rm -rf ./trinity_out_dir`;
 `rm -rf ./edgeR_gene`;
 `rm -rf ./edgeR_trans`;
+`rm -rf ./DESeq2_gene`;
+`rm -rf ./DESeq2_trans`;
 `rm -rf ./__TrinDemo_checkpoints_dir`;
 `rm -rf ./Trinotate`;
 `rm -rf ./bowtie_out`;

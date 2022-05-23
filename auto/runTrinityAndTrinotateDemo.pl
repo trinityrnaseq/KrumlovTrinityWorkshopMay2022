@@ -117,28 +117,36 @@ my $run_Trinity_cmd = "$trinity_dir/Trinity --seqType fq "
 
 &process_cmd($run_Trinity_cmd, "$checkpoints_dir/trinity.ok");
 
+
+
+# rename Trinity fasta file
+&process_cmd("mv trinity_out_dir.Trinity.fasta Trinity.fasta", "$checkpoints_dir/trin_fa_rename.ok");
+&process_cmd("mv trinity_out_dir.Trinity.fasta.gene_trans_map Trinity.fasta.gene_trans_map", "$checkpoints_dir/trin_gene_trans_map.renamed.ok");
+
+
+
 # Examine top of Trinity.fasta file
-&process_cmd("head trinity_out_dir/Trinity.fasta", "$checkpoints_dir/head_trinity.ok");
+&process_cmd("head Trinity.fasta", "$checkpoints_dir/head_trinity.ok");
 
 # count the number of transcripts assembled.
-&process_cmd("grep '>' trinity_out_dir/Trinity.fasta | wc -l ", "$checkpoints_dir/count_trans.ok");
+&process_cmd("grep '>' Trinity.fasta | wc -l ", "$checkpoints_dir/count_trans.ok");
 
 
 # Get Trinity stats:
-&process_cmd("$trinity_dir/util/TrinityStats.pl trinity_out_dir/Trinity.fasta", "$checkpoints_dir/trin_stats.ok");
+&process_cmd("$trinity_dir/util/TrinityStats.pl Trinity.fasta", "$checkpoints_dir/trin_stats.ok");
 
 
 ## representation of reads by the assembly
-&process_cmd("bowtie2-build trinity_out_dir/Trinity.fasta trinity_out_dir/Trinity.fasta", "$checkpoints_dir/bowtie2_build_read_assess.ok");
+&process_cmd("bowtie2-build Trinity.fasta Trinity.fasta", "$checkpoints_dir/bowtie2_build_read_assess.ok");
 
-&process_cmd("bowtie2 --local --no-unal -x trinity_out_dir/Trinity.fasta -q -1 data/wt_SRR1582651_1.fastq -2 data/wt_SRR1582651_2.fastq | samtools view -Sb - | samtools sort -o - - > bowtie2.bam", "$checkpoints_dir/bowtie2_align_reads_assessss.ok");
+&process_cmd("bowtie2 --local --no-unal -x Trinity.fasta -q -1 data/wt_SRR1582651_1.fastq -2 data/wt_SRR1582651_2.fastq | samtools view -Sb - | samtools sort -o - - > bowtie2.bam", "$checkpoints_dir/bowtie2_align_reads_assessss.ok");
 
 
 ## Examine read alignments in IGV
 
 &process_cmd("samtools index bowtie2.bam", "$checkpoints_dir/idx_bowtie_alignments.ok");
 
-my $igv_cmd = "igv.sh -g trinity_out_dir/Trinity.fasta bowtie2.bam";
+my $igv_cmd = "igv.sh -g Trinity.fasta bowtie2.bam";
 if ($AUTO_MODE) {
     $igv_cmd .= " & ";
 }
@@ -148,11 +156,11 @@ if ($AUTO_MODE) {
 ###########################################
 ## assess number of full-length transcripts
 
-&process_cmd("blastx -query trinity_out_dir/Trinity.fasta -db data/mini_sprot.pep -out blastx.outfmt6 -evalue 1e-20 -num_threads 2 -max_target_seqs 1 -outfmt 6", "$checkpoints_dir/blastx_for_full_length.ok");
+&process_cmd("blastx -query Trinity.fasta -db data/mini_sprot.pep -out blastx.outfmt6 -evalue 1e-20 -num_threads 2 -max_target_seqs 1 -outfmt 6", "$checkpoints_dir/blastx_for_full_length.ok");
 
 &process_cmd("head blastx.outfmt6 | column -t", "$checkpoints_dir/check_blast_output.ok");
 
-&process_cmd("$trinity_dir/util/analyze_blastPlus_topHit_coverage.pl blastx.outfmt6 trinity_out_dir/Trinity.fasta data/mini_sprot.pep", "$checkpoints_dir/tophat_blast_cov_stats.ok");
+&process_cmd("$trinity_dir/util/analyze_blastPlus_topHit_coverage.pl blastx.outfmt6 Trinity.fasta data/mini_sprot.pep", "$checkpoints_dir/tophat_blast_cov_stats.ok");
 
 
 ###################################
@@ -162,7 +170,7 @@ if ($AUTO_MODE) {
 
 my $align_estimate_command = "$trinity_dir/util/align_and_estimate_abundance.pl --seqType fq "
     . " --samples_file data/samples.txt "
-    . " --transcripts trinity_out_dir/Trinity.fasta "
+    . " --transcripts Trinity.fasta "
     . " --est_method salmon "
     . " --trinity_mode  "
     . " --prep_reference "
@@ -181,7 +189,7 @@ my $get_quant_file_listing_cmd = 'find wt_* GSNO_* -name "quant.sf" | tee quant_
 &process_cmd($get_quant_file_listing_cmd, "$checkpoints_dir/salmon_quant_files.list.ok");
 
 
-my $make_matrix_cmd = "$trinity_dir/util/abundance_estimates_to_matrix.pl --est_method salmon --out_prefix Trinity --name_sample_by_basedir --quant_files quant_files.list --gene_trans_map trinity_out_dir/Trinity.fasta.gene_trans_map";
+my $make_matrix_cmd = "$trinity_dir/util/abundance_estimates_to_matrix.pl --est_method salmon --out_prefix Trinity --name_sample_by_basedir --quant_files quant_files.list --gene_trans_map Trinity.fasta.gene_trans_map";
 
 &process_cmd($make_matrix_cmd, "$checkpoints_dir/get_matrix.ok");
 
@@ -193,7 +201,7 @@ my $make_matrix_cmd = "$trinity_dir/util/abundance_estimates_to_matrix.pl --est_
 
 
 ## Examine the E90N50 statistic
-&process_cmd("$trinity_dir//util/misc/contig_ExN50_statistic.pl Trinity.isoform.TMM.EXPR.matrix trinity_out_dir/Trinity.fasta > ExN50.stats", "$checkpoints_dir/ExNstats.ok");
+&process_cmd("$trinity_dir//util/misc/contig_ExN50_statistic.pl Trinity.isoform.TMM.EXPR.matrix Trinity.fasta > ExN50.stats", "$checkpoints_dir/ExNstats.ok");
 
 &process_cmd("cat ExN50.stats", "$checkpoints_dir/cat_ExNstats.ok");
 
@@ -406,8 +414,8 @@ sub run_Trinotate_demo {
     @sections = grep { $_ ne 'GLOBALS' } @sections;
 
     my %globals = $ini_reader->get_section_hash('GLOBALS');
-    $globals{TRANSCRIPTS_FASTA} = "../trinity_out_dir/Trinity.fasta";
-    $globals{GENE_TO_TRANS_MAP} = "../trinity_out_dir/Trinity.fasta.gene_trans_map";
+    $globals{TRANSCRIPTS_FASTA} = "Trinity.fasta";
+    $globals{GENE_TO_TRANS_MAP} = "Trinity.fasta.gene_trans_map";
     $globals{CPU} = 2;
     $globals{TRINOTATE_HOME} = $trinotate_dir;
     
