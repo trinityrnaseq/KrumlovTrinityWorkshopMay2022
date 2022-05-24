@@ -1,3 +1,6 @@
 [submodule "KrumlovTrinityWorkshopMay2022.wiki"]
 	path = KrumlovTrinityWorkshopMay2022.wiki
 	url = https://github.com/trinityrnaseq/KrumlovTrinityWorkshopMay2022.wiki.git
+[submodule "__misc/genomics_adventure"]
+	path = __misc/genomics_adventure
+	url = https://github.com/guyleonard/genomics_adventure.git
