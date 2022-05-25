@@ -4,3 +4,6 @@
 [submodule "__misc/genomics_adventure"]
 	path = __misc/genomics_adventure
 	url = https://github.com/guyleonard/genomics_adventure.git
+[submodule "__misc/Intro_to_R_2022"]
+	path = __misc/Intro_to_R_2022
+	url = https://github.com/KSteffen/Intro_to_R_2022.git
